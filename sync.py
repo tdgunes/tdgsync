@@ -6,7 +6,7 @@
 # My ultimate test server solution!
 # Requirements: python-twitter
 # tdgunes.org/sync
-# needs lm_sensors!
+# Needs lm_sensors!
 # GPLv3
 
 from ftplib import FTP
