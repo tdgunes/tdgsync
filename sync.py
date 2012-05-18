@@ -6,12 +6,10 @@
 # My ultimate test server solution!
 # Requirements: python-twitter
 # tdgunes.org/sync
-# Needs lm_sensors!
-# GPLv3
-
+# needs lm_sensors!
 from ftplib import FTP
-import os,time,getpass,random,traceback
-import datetime,httplib2,platform
+import os,time,getpass,random,traceback,sys
+import datetime,httplib2,platform,reader
 try:
     import tweepy
     tweet = True
@@ -27,36 +25,42 @@ try:
     utility = True
 except ImportError:
     utility = False
-    print """Warning - If you want to send, track your servers status,\n
+    print """Warning - "utility = False"
+              If you want to send, track your servers status,\n
              (like cpu usage, memory, disks etc.) You need to install\n
              psutil from "http://code.google.com/p/psutil/"""
 
-hostname = 'ftp.tdgunes.org'
-login = 'tdgunes'
-password = getpass.getpass("FTP password: ")
-version = "0.3"
-interval = 75  #seconds
-filepath = "/httpdocs/server/" #which directory your file will be stored
-filename = "index.html" #file that you want to store 
-currentip = "currentip" #dont edit this no need to
-#twitter things
-tckey = "xwJ9dBEZ1jUgRpnYCM7Xfg"
-tcsecret = "IwZju6BuRJTPQLUuWhmSJ2atoc1EmIrSlUyLQfAGI"
-tatkey = "" #secret you need authorize and get token key and secret 
-tatsecret = ""  # secret 
+configfile = "/home/tdgunes/scripts/tdgsyncv2/sync.config"
+
+
+#reader api
+
+hostname = reader.getHostName(configfile)
+login = reader.getFTPLoginName(configfile)
+password = reader.ftpPassword(configfile)
+interval = reader.getIntervalValue(configfile)  #seconds
+filepath = reader.ftpFilePath(configfile) #which directory your file will be stored
+filename = reader.htmlPageName(configfile) #file that you want to store 
+tckey = reader.twitterAppKeys(configfile)[0]
+tcsecret = reader.twitterAppKeys(configfile)[1]
+tatkey = reader.twitterUserKeys(configfile)[0] #secret
+tatsecret = reader.twitterUserKeys(configfile)[1] # secret 
+tweet = reader.twitter(configfile)
+
+#DEFAULTS
+version = "0.3.4"
 #oldmessage ="" #in order to not send that same message again
+currentip = "currentip"
 
-if raw_input("Do you want to send service messages to Twitter(y/n): ") == "n":
-    tweet= False
+def authorizeTwitter(ckey,csecret,atkey,atsecret):
+    auth = tweepy.OAuthHandler(ckey,csecret)
+    auth.set_access_token(atkey,atsecret)
+    return tweepy.API(auth)
 
-if tweet: #if you think it is secure to store your password in this script, go on! :-)
-    #tweetpass = getpass.getpass("Twitter password: ") 
-    auth = tweepy.OAuthHandler(tckey, tcsecret)
-    auth.set_access_token(tatkey, tatsecret)
-    api = tweepy.API(auth)
+if tweet and len(sys.argv)>1: 
+    api = authorizeTwitter(tckey,tcsecret,tatkey,tatsecret)
 
-
-#TDG's Small Essential Library (TDG-SEL) :)
+#TDG's Small Essential Library (TDG-SEL)
 def printLog(log):
     log = log+" ("+getDate()+") "
     if tweet:
@@ -68,11 +72,11 @@ def printLog(log):
            traceback.print_exc()
            return False
        finally:
-           #log = "("+getDate()+") "+log
            print log
+
+
 def sendTweet(message):
-    api.update_status(message)
- 
+    api.update_status(message)   
 
 
 def getIP(): #TDG mini IP Service
@@ -81,6 +85,7 @@ def getIP(): #TDG mini IP Service
         resp, content = h.request('http://tdgunes.org/getip/','GET')
         return content.strip()
     except:
+        traceback.print_exc()
         printLog("Error - Unknown! Unable get IP adress!")
         return "Error - Unknown! Unable get IP adress!"
 def getDate():
@@ -104,30 +109,43 @@ def generateHTML(ip,date):
       <th>Game</th>
       <th>IP+Port</th>
       <th>Port</th>
+      <th>Password</th>
          
       </tr>
     <tr>
       <td>Minecraft</td>
       <td>%s:25565</td>
       <td>25565</td>
+      <td>None</td>
     </tr>
     
     <tr>
      <td>Urban Terror</td>
       <td>%s:27960</td>
       <td>27960</td>
-
+      <td>None</td>
 
     </tr>
 
     <tr>
      <td>VPN Server</td>
-      <td>%s:1723</td>
-      <td>1723</td>
+      <td>%s</td>
+      <td>None</td>
+      <td>...</td>
 
 
     </tr> 
  
+    <tr>
+     <td>Garry's Mod(VAC Enabled)</td>
+      <td>%s:27015</td>
+      <td>27015</td>
+      <td>tdgtdgtdg</td>
+
+
+    </tr> 
+ 
+
       <tr>
         <td>...</td>
         <td>...</td>
@@ -141,7 +159,7 @@ def generateHTML(ip,date):
     <i>sync.py - %s</i></br>
     <i>%s</i></br>
     <i>Taha Dogan Gunes - <a href="http://tdgunes.org">tdgunes.org</a></i>
-    </body></html>""" % (ip, ip, date, str(interval), ip,ip,ip, version, platform.platform())
+    </body></html>""" % (ip, ip, date, str(interval), ip, ip,ip,ip, version, platform.platform())
     return html
 
 def ftpBrowse(ftpObject, path):
@@ -192,10 +210,9 @@ def utilityMessage(): #My server's emotions
         elif x == 17:
             printLog("My firewall is undefeatable!")
             
-currentip = getIP()
-printLog("TDG Server is Online! sync:%s ip:%s" % (version,currentip))
-printLog("Hate being rebooted... :(")
-while True: #Normal loop
+
+
+def serviceLoop(): #Normal loop
    # print "- Looper OK"
     
     # Just print when ip changes
@@ -204,7 +221,7 @@ while True: #Normal loop
        if printLog("I hate being dynamic! But it is my nature:%s " % ip):
            currentip = ip
     
-    if random.randint(1,20) == 1:
+    if random.randint(1,20000) == 89:
         utilityMessage()
 
 
@@ -220,3 +237,29 @@ while True: #Normal loop
         printLog("Error - FTP connection problem to the %s" % hostname)
     time.sleep(interval)
 
+if len(sys.argv)>1:
+    currentip = getIP()
+    printLog("TDG Server is Online! sync: %s ip: %s" % (version,currentip))
+    printLog("Aaaah my head hurts!")
+    while True:
+        ip = getIP()
+        if currentip != ip:
+            if printLog("I hate being dynamic! But it is my nature:%s " % ip):
+                currentip = ip
+
+        if random.randint(1,20000) == 89:
+            utilityMessage()
+
+
+        f = open('index.html','w')
+        f.write(generateHTML(ip,getDate()))
+        f.close()
+        try:
+            ftp = FTP(hostname,login,password)
+            ftpBrowse(ftp, filepath)
+            ftp.storbinary('STOR %s' % filename, open(filename,'rb'))
+            ftp.close()
+        except:
+            printLog("Error - FTP connection problem to the %s" % hostname)
+        time.sleep(interval)
+    
