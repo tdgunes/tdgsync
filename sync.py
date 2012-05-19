@@ -7,9 +7,13 @@
 # Requirements: python-twitter
 # tdgunes.org/sync
 # needs lm_sensors!
+
+#FIXME needs a object-oriented sync.py for reader api connection 
+# and for behaving as a library
+
 from ftplib import FTP
 import os,time,getpass,random,traceback,sys
-import datetime,httplib2,platform,reader
+import datetime,httplib2,platform,reader,cStringIO
 try:
     import tweepy
     tweet = True
@@ -26,11 +30,11 @@ try:
 except ImportError:
     utility = False
     print """Warning - "utility = False"
-              If you want to send, track your servers status,\n
+              If you want to send, track your serers status,\n
              (like cpu usage, memory, disks etc.) You need to install\n
              psutil from "http://code.google.com/p/psutil/"""
 
-configfile = "/home/tdgunes/scripts/tdgsyncv2/sync.config"
+configfile = "/home/tdgunes/scripts/tdgsyncv3/sync.config"
 
 
 #reader api
@@ -52,16 +56,11 @@ version = "0.3.4"
 #oldmessage ="" #in order to not send that same message again
 currentip = "currentip"
 
-def authorizeTwitter(ckey,csecret,atkey,atsecret):
-    auth = tweepy.OAuthHandler(ckey,csecret)
-    auth.set_access_token(atkey,atsecret)
-    return tweepy.API(auth)
 
-if tweet and len(sys.argv)>1: 
-    api = authorizeTwitter(tckey,tcsecret,tatkey,tatsecret)
+# ========================================================================================
 
-#TDG's Small Essential Library (TDG-SEL)
-def printLog(log):
+#TDG's Small Essential Library (TDG-SEL) :_P
+def printLog(log): #logs and tweets messages if tweet = True
     log = log+" ("+getDate()+") "
     if tweet:
        try:
@@ -79,7 +78,7 @@ def sendTweet(message):
     api.update_status(message)   
 
 
-def getIP(): #TDG mini IP Service
+def getIP(): #TDG mini IP Service - works
     try:
         h = httplib2.Http('.cache')
         resp, content = h.request('http://tdgunes.org/getip/','GET')
@@ -91,153 +90,67 @@ def getIP(): #TDG mini IP Service
 def getDate():
     return str(datetime.datetime.now())[:-3]
 
-def generateHTML(ip,date):    
-    html = """<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org /TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml"> 
-    
-    <html><title>TDG Home Server!</title>
-    <body>
-    <div class="centered">
-    <h1>TDG Home Server Gateway!</h2>
-    <p>TDG Home Server's IP is: <a href="http://%s/">%s</a></p>
-    <p>This page updated at: %s</br>
-    All of the current game servers will be listed here.</br>
-    This page is planned to be updated for every %s  seconds!</p>
-    <h2>Game Server List</h2>
-      <table border="1">
-    <tr>
-      <th>Game</th>
-      <th>IP+Port</th>
-      <th>Port</th>
-      <th>Password</th>
-         
-      </tr>
-    <tr>
-      <td>Minecraft</td>
-      <td>%s:25565</td>
-      <td>25565</td>
-      <td>None</td>
-    </tr>
-    
-    <tr>
-     <td>Urban Terror</td>
-      <td>%s:27960</td>
-      <td>27960</td>
-      <td>None</td>
 
-    </tr>
-
-    <tr>
-     <td>VPN Server</td>
-      <td>%s</td>
-      <td>None</td>
-      <td>...</td>
-
-
-    </tr> 
- 
-    <tr>
-     <td>Garry's Mod(VAC Enabled)</td>
-      <td>%s:27015</td>
-      <td>27015</td>
-      <td>tdgtdgtdg</td>
-
-
-    </tr> 
- 
-
-      <tr>
-        <td>...</td>
-        <td>...</td>
-        <td>...</td>
-      </tr>
-    </table>
-    <p><b>This page is not saying that these servers are running!
-    </br> I will tell you if they are online or not :)</b></p>
-    </br>
-    </div> 
-    <i>sync.py - %s</i></br>
-    <i>%s</i></br>
-    <i>Taha Dogan Gunes - <a href="http://tdgunes.org">tdgunes.org</a></i>
-    </body></html>""" % (ip, ip, date, str(interval), ip, ip,ip,ip, version, platform.platform())
-    return html
-
-def ftpBrowse(ftpObject, path):
+def ftpBrowse(ftpObject, path): #more easy way to browse in ftp 
     paths = path.split("/")
     for i in paths:
         ftpObject.cwd(i)
 
-def utilityMessage(): #My server's emotions
-    if utility:
-        x = random.randint(1,17)
-        if x == 1:
-            printLog("Am I overloaded ? I got %s cpu(s) and my cpu usage is %s percent" % (str(psutil.NUM_CPUS),str(psutil.cpu_percent(interval=1))))
-        elif x == 2:
-            printLog("%s percent of my memories caught me. I need upgrade!" % str(psutil.phymem_usage().percent))
-        elif x == 3:
-            printLog("My admin says if I stop working, I may find myself in trash can.")
-        elif x == 4:
-            printLog("I am an old wise server, yay!")
-        elif x == 5:
-            printLog("My root password is ... you think I am so stupid, don't you?")
-        elif x == 6: 
-            printLog("My body fat percent is %s" % str(psutil.disk_usage('/').percent))
-        elif x == 7:
-            printLog("I sit here everyday and show you my ip number, am I crazy ?")
-        elif x == 8:
-            a = os.popen("sensors")
-            b = "%s" % a.read()
-            b =b.split("temp1:")[1]
-            b =b.strip().split(" ")
-            printLog("Somebody help, I am melting here. My temperature is %s" % b[0])
-        elif x == 9:
-            printLog("I really wanted to show you my game server services someday!")
-        elif x == 10:
-            printLog("Connecting to SkyNet...///")
-            printLog("Scared? Just joking :)")
-        elif x == 11:
-            printLog("If a message is duplicated serveral times, remember I am not a HUMAN")
-        elif x == 12:
-            printLog("I am capable of destroying the whole universe but I don't want to")
-        elif x == 13:
-            printLog("There is a cat on me, go away cat I am just a old-tech server")
-        elif x == 14:
-            printLog("I can do lots of things. %s -> I generated a random number!" % str(random.randint(23,124124)))
-        elif x == 15:
-            printLog("Not having a desktop environment is killing me!")
-        elif x == 16:
-            printLog("UrT ip: %s:27960" % getIP())
-        elif x == 17:
-            printLog("My firewall is undefeatable!")
-            
+def getTemperature(): # getting temperature from hard way
+     a = os.popen("sensors")
+     b = "%s" % a.read()
+     b =b.split("temp1:")[1]
+     b =b.strip().split(" ")
+     return b[0].strip()
+
+def fillAStringWithValues(mystring):
+    # =ip= for getIP()
+    # =cpunumber= for str(psutil.NUM_CPUS)
+    # =cpupercent= for str(psutil.cpu_percent(interval=1))
+    # =memory= for str(psutil.phymem_usage().percent)
+    # =diskusage= for str(psutil.disk_usage('/').percent)
+    # =temp= for getTemperature()
+    # =random= for str(random.randint(23,124124))
+    # =ip= for getIP()
+    # =version= for version
+    # =date= for getDate()
+    # =interval= for interval
+    # =platform= for platform.platform()
+
+    mystring = mystring.replace("=ip=", getIP())
+    mystring = mystring.replace("=cpunumber=",str(psutil.NUM_CPUS))
+    mystring = mystring.replace("=cpupercent=", str(psutil.cpu_percent(interval=1)))
+    mystring = mystring.replace("=memory=",  str(psutil.phymem_usage().percent))
+    mystring = mystring.replace("=diskusage=",  str(psutil.disk_usage('/').percent))
+    mystring = mystring.replace("=temp=", getTemperature())
+    mystring = mystring.replace("=random=", str(random.randint(23,124124)))
+    mystring = mystring.replace("=version=", version)
+    mystring = mystring.replace("=date=",getDate())
+    mystring = mystring.replace("=interval",str(interval))
+    mystring = mystring.replace("=platform=", platfrom.platform())
+
+    return mystring
+
+def authorizeTwitter(ckey,csecret,atkey,atsecret):
+    auth = tweepy.OAuthHandler(ckey,csecret)
+    auth.set_access_token(atkey,atsecret)
+    return tweepy.API(auth)
+
+# ========================================================================================
 
 
-def serviceLoop(): #Normal loop
-   # print "- Looper OK"
-    
-    # Just print when ip changes
-    ip = getIP()
-    if currentip != ip:
-       if printLog("I hate being dynamic! But it is my nature:%s " % ip):
-           currentip = ip
-    
-    if random.randint(1,20000) == 89:
-        utilityMessage()
 
 
-    f = open('index.html','w')
-    f.write(generateHTML(ip,getDate()))
-    f.close()
-    try:
-        ftp = FTP(hostname,login,password)
-        ftpBrowse(ftp, filepath)
-        ftp.storbinary('STOR %s' % filename, open(filename,'rb'))
-        ftp.close()
-    except:
-        printLog("Error - FTP connection problem to the %s" % hostname)
-    time.sleep(interval)
+# ==== Service Start ====
 
-if len(sys.argv)>1:
+# Service Start and Loop Process
+
+if len(sys.argv)>1: 
+    if tweet:
+        api = authorizeTwitter(tckey,tcsecret,tatkey,tatsecret)
+
+
+
     currentip = getIP()
     printLog("TDG Server is Online! sync: %s ip: %s" % (version,currentip))
     printLog("Aaaah my head hurts!")
@@ -247,19 +160,24 @@ if len(sys.argv)>1:
             if printLog("I hate being dynamic! But it is my nature:%s " % ip):
                 currentip = ip
 
-        if random.randint(1,20000) == 89:
-            utilityMessage()
+        if random.randint(1,2000) == 89:
+            if utility:
+                randomsentence = random.choice(getSentencesLines(configfile))
+                printLog(fillAStringWithValues(randomsentence))
 
 
-        f = open('index.html','w')
-        f.write(generateHTML(ip,getDate()))
-        f.close()
+        output = cStringIO.StringIO()
+        output.write(fillAStringWithValues(reader.getHTMLString(configfile)))
+
         try:
             ftp = FTP(hostname,login,password)
             ftpBrowse(ftp, filepath)
-            ftp.storbinary('STOR %s' % filename, open(filename,'rb'))
+            ftp.storbinary('STOR %s' % filename, output)
             ftp.close()
+            output.close()
         except:
             printLog("Error - FTP connection problem to the %s" % hostname)
+            traceback.print_exc()
         time.sleep(interval)
-    
+
+# ==== Service End ====

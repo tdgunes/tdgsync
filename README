@@ -1,4 +1,56 @@
 TDG's sync.py
 ---------------
+    If you hate DDNS services like me and want to make your 
+own solution for your home server, this project is for you ...
 
-Details are coming soon...
+
+= Basic Configuration:
+    
+    = sync.config
+        
+       ...
+
+    = sentences
+ 
+       ...
+
+    = index.html
+ 
+       ...
+
+= Dependencies
+
+    = tweepy
+     
+       ...
+
+    = psutil
+ 
+       ...
+
+    = lm-sensors
+
+       ...
+
+= Customization
+
+    = Adding a new message
+
+       ...
+
+    = Changing intervals
+
+       ...
+
+    = Editing HTML file
+
+       ...
+
+= Using 'sync.py' as a High-Level Libray
+    
+    = Examples
+
+       ...
+
+
+    

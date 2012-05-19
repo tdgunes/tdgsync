@@ -24,9 +24,25 @@ def readFile(filepath):
     return filelines
 
 def readEngine(keyword,configfile,category):
+    """
+        For reading sync.config files, usage:
+        - 'keyword' is for getting which value 
+          you want to get from config file
+ 
+        - 'configfile' is the path that configuration
+          file is located
+ 
+        - 'category' is the value getting type
+          This is really important, for example
+          in sync.config:
+          'utility=1'
+          if you want get this as a boolean value you need to use
+          category number 2, for getting as a string please use 1.
+
+    """
     #category = 1 is for getting normal values string or integer etc.
     #category = 2 is for yes no returns boolean values
-    #category = 3 is for getting array values (not ready!)
+    #category = 3 is for getting array values (ready!)
     if category in [1,2,3]:
         pass
     else:
@@ -42,6 +58,9 @@ def readEngine(keyword,configfile,category):
                     return True
                 elif draft == "0":
                     return False
+            elif category == 3:
+                #Arrays will be splitted using comma in config file
+                return draft.split(",")
     return None
 
 def getFTPLoginName(configfile):
@@ -62,9 +81,27 @@ def ftpFilePath(configfile):
 def ftpPassword(configfile):
     return readEngine("ftppass",configfile,1) 
 
-
 def twitter(configfile):
     return readEngine("twitter",configfile,1)
+
+def getSentencesPath(configfile):
+    return readEngine("sentences",configfile,1)
+
+def getSentencesLines(configfile):
+    myfile = open(getSentencesPath(configfile),"r")
+    return (copyArray(myfile.readlines()))
+
+
+def getSentencesString(configfile):
+    myfile = open(getSentencesPath(configfile),"r")
+    return("%s" % myfile.read())
+
+def getHTMLString(configfile):
+    myfile = open(htmlPageName(configfile),"r")
+    #sometimes .read() returns None, so
+    return("%s" % myfile.read())
+
+
 
 def twitterAppKeys(configfile):
     #api key 1 tckey 2 tcsecret
@@ -81,4 +118,6 @@ def twitterUserKeys(configfile):
     returnlist.append(readEngine("tatsecret",configfile,1))
     return returnlist
     #apikeys
+
+
 

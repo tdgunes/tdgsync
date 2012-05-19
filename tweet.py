@@ -4,9 +4,10 @@
 # Taha Dogan Gunes
 # tdgunes@gmail.com	
 
-import sync #also behaves like a library 
+import sync #sync library example 
 
 message = raw_input("Message: ")
+
 sync.tweet = True
 sync.api = sync.authorizeTwitter(sync.tckey,
                             sync.tcsecret,
