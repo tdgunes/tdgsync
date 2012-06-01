@@ -17,6 +17,9 @@ def copyArray(source):
     return returner
 
 def readFile(filepath):
+    """
+        reading file lines without losing their lines
+    """
     myfile = open(filepath,"r")
     filelines = copyArray(myfile.readlines())
     myfile.close()
@@ -48,8 +51,8 @@ def readEngine(keyword,configfile,category):
     else:
         raise TypeError
 
-    for i in readFile(configfile):
-        if keyword in i and i[0] != "#":
+    for i in readFile(configfile): #bug solved now it should work
+        if keyword == i.split("=")[0].strip() and i[0] != "#":
             draft = i.split("=")[1].strip()
             if category == 1:
                 return draft
