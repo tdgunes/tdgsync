@@ -34,6 +34,22 @@ except ImportError:
              (like cpu usage, memory, disks etc.) You need to install\n
              psutil from "http://code.google.com/p/psutil/"""
 
+
+class api:
+    def __init__(self, configfile):
+        self.hostname = reader.getHostName(configfile)
+        self.login = reader.getFTPLoginName(configfile)
+        self.password = reader.ftpPassword(configfile)
+        self.interval = reader.getIntervalValue(configfile)
+        self.filepath = reader.ftpFilePath(configfile)
+        self.filename = reader.htmlPageName(configfile)
+        self.tckey = reader.twitterAppKeys(configfile)[0]
+        self.tcsecret = reader.twitterAppKeys(configfile)[1]
+        self.tatkey = reader.twitterUserKeys(configfile)[0]
+        self.tatsecret = reader.twitterUserKeys(configfile)[1]
+        self.tweet = reader.twitter(configfile)
+    
+ 
 configfile = "/home/tdgunes/scripts/tdgsyncv3/sync.config"
 
 
