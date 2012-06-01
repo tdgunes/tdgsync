@@ -26,6 +26,20 @@ def readFile(filepath):
     #print filelines
     return filelines
 
+
+def readEngineReverse(result,configfile):
+    """
+        This is for only strings category = 1
+        
+        NOTE: This may not work because of duplicate keyword values
+    """
+
+    for i in readFile(configfile):
+        if result == i.split("=")[1].strip() and i[0] != "#":
+            draft = i.split("=")[0].strip()
+            return draft
+    return None
+
 def readEngine(keyword,configfile,category):
     """
         For reading sync.config files, usage:
