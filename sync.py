@@ -96,7 +96,7 @@ def sendTweet(message):
 
 def getIP(): #TDG mini IP Service - works
     try:
-        h = httplib2.Http('.cache')
+        h = httplib2.Http()
         resp, content = h.request('http://tdgunes.org/getip/','GET')
         return content.strip()
     except:
@@ -142,8 +142,8 @@ def fillAStringWithValues(mystring):
     mystring = mystring.replace("=random=", str(random.randint(23,124124)))
     mystring = mystring.replace("=version=", version)
     mystring = mystring.replace("=date=",getDate())
-    mystring = mystring.replace("=interval",str(interval))
-    mystring = mystring.replace("=platform=", platfrom.platform())
+    mystring = mystring.replace("=interval=",str(interval))
+    mystring = mystring.replace("=platform=", platform.platform())
 
     return mystring
 
@@ -182,13 +182,13 @@ if len(sys.argv)>1:
                 printLog(fillAStringWithValues(randomsentence))
 
 
-        output = cStringIO.StringIO()
-        output.write(fillAStringWithValues(reader.getHTMLString(configfile)))
+        output = cStringIO.StringIO(fillAStringWithValues(reader.getHTMLString(configfile)))
+
 
         try:
             ftp = FTP(hostname,login,password)
             ftpBrowse(ftp, filepath)
-            ftp.storbinary('STOR %s' % filename, output)
+            ftp.storbinary('STOR %s' % filename.split("/")[-1], output)
             ftp.close()
             output.close()
         except:
