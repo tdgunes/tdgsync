@@ -71,7 +71,7 @@ tweet = reader.twitter(configfile)
 version = "0.3.4"
 #oldmessage ="" #in order to not send that same message again
 currentip = "currentip"
-
+totaltime=0
 
 # ========================================================================================
 
@@ -161,7 +161,7 @@ def authorizeTwitter(ckey,csecret,atkey,atsecret):
 
 # Service Start and Loop Process
 
-if len(sys.argv)>1: 
+if __name__ == "__main__":
     if tweet:
         api = authorizeTwitter(tckey,tcsecret,tatkey,tatsecret)
 
@@ -169,16 +169,18 @@ if len(sys.argv)>1:
 
     currentip = getIP()
     printLog("TDG Server is Online! sync: %s ip: %s" % (version,currentip))
-    printLog("Aaaah my head hurts!")
+    randomsentence = random.choice(reader.getSentencesLines(configfile) )
+    printLog(fillAStringWithValues(randomsentence))
     while True:
         ip = getIP()
         if currentip != ip:
             if printLog("I hate being dynamic! But it is my nature:%s " % ip):
                 currentip = ip
 
-        if random.randint(1,2000) == 89:
+        if totaltime==((3600%interval)+3600):#sending message for every one hour
+            totaltime = 0
             if utility:
-                randomsentence = random.choice(getSentencesLines(configfile))
+                randomsentence = random.choice(reader.getSentencesLines(configfile))
                 printLog(fillAStringWithValues(randomsentence))
 
 
@@ -195,5 +197,6 @@ if len(sys.argv)>1:
             printLog("Error - FTP connection problem to the %s" % hostname)
             traceback.print_exc()
         time.sleep(interval)
+        totaltime += interval
 
 # ==== Service End ====

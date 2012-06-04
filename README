@@ -32,7 +32,7 @@ own solution for your home server, this project is for you ...
 
 Note: I don't have much time to write a system service, until then this should help:
 
-1. Write "sudo -u tdgunes "/home/example/sync.sh" to /etc/rc.local
+1. Write "sudo -u exampleuser "/home/example/sync.sh" to /etc/rc.local
 
 2. Put sync.sh to your "/home/example/"
 
