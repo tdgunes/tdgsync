@@ -3,6 +3,48 @@ TDG's sync.py
     If you hate DDNS services like me and want to make your 
 own solution for your home server, this project is for you ...
 
+= Requirements
+
+- Python >= 2.6.2
+
+= Optionals
+
+- tweepy (easy_install tweepy 
+          git clone https://github.com/tweepy/tweepy.git)
+- psutil >= 0.4.1
+          (wget http://code.google.com/p/psutil/downloads/detail?name=psutil-0.4.1.tar.gz&can=2&q=)
+- lm_sensors (use your distro's own package system)
+
+= Install
+
+1. Download it or clone it from here. (https://github.com/tdgunes/tdgsync)
+
+2. If it is a zip archive (unzip) - if you git clone it, you can pass this step :)
+
+3. Edit and customize these files: sync.config, sentences, index.html(all of these file names can change except sync.config)
+
+4. Edit sync.py's sync.config file path.
+
+5. Run "python sync.py start"
+
+
+= Start this at startup (A bit hard)
+
+Note: I don't have much time to write a system service, until then this should help:
+
+1. Write "sudo -u tdgunes "/home/example/sync.sh" to /etc/rc.local
+
+2. Put sync.sh to your "/home/example/"
+
+3. Edit your sync.sh and change the example path 
+
+- "screen -m -d -S sync python /home/example/sync.py start"
+
+4. Reboot the system, and hope it works :)
+
+
+
+More details will be added!
 
 = Basic Configuration:
     
