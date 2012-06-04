@@ -19,7 +19,7 @@ own solution for your home server, this project is for you ...
 
 1. Download it or clone it from here. (https://github.com/tdgunes/tdgsync)
 
-2. If it is a zip archive (unzip) - if you git clone it, you can pass this step :)
+2. If it is a zip archive (unzip) - if you use git clone it, you can pass this step :)
 
 3. Edit and customize these files: sync.config, sentences, index.html(all of these file names can change except sync.config)
 
