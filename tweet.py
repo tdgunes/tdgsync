@@ -7,10 +7,5 @@
 import sync #sync library example 
 
 message = raw_input("Message: ")
-
-sync.tweet = True
-sync.api = sync.authorizeTwitter(sync.tckey,
-                            sync.tcsecret,
-                            sync.tatkey,
-                            sync.tatsecret)
-sync.printLog(message)
+mysync = sync.api("/Users/tdgunes/Desktop/tdgconfigs/sync.config")
+mysync.printLog(message)

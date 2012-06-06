@@ -9,6 +9,7 @@
 # needs lm_sensors!
 # config file reader for sync.py!
 
+import traceback, os
 
 def copyArray(source):
     returner = []
@@ -26,6 +27,31 @@ def readFile(filepath):
     #print filelines
     return filelines
 
+def deleteFile(filepath):
+    try:
+        os.remove(filepath)
+        return True
+    except:
+        return False
+
+def writeEngine(filestring,filepath):
+    """
+        writing a string to a file is now much easier :)
+    """
+    myfile = open(filepath,"w")
+    myfile.write(filestring)
+    myfile.close()
+
+def writeLinesEngine(filelines, filepath):
+    """
+        writing a string list to a file is now much easier :)
+    """
+    myfile = open(filepath,"w")
+    myfile.writelines(filelines)
+    myfile.close()
+
+
+
 
 def readEngineReverse(result,configfile):
     """
@@ -39,6 +65,21 @@ def readEngineReverse(result,configfile):
             draft = i.split("=")[0].strip()
             return draft
     return None
+
+
+def replaceEngine(keyword,value,configfile):
+    x = 0 #item that needs to be changed
+    newline = ""
+    filelines = readFile(configfile)
+    for i in filelines:
+        if keyword == i.split("=")[0].strip() and i[0] != "#":
+            newline= keyword+"="+value+"\n"
+            break
+        x+=1     
+    filelines[x] = newline
+    os.remove(configfile)
+    writeLinesEngine(filelines,configfile)
+    
 
 def readEngine(keyword,configfile,category):
     """
@@ -86,8 +127,8 @@ def getFTPLoginName(configfile):
 def getHostName(configfile):
     return readEngine("hostname",configfile,1)
 
-def getIntervalValue(configfile):
-    return int(readEngine("interval",configfile,1))
+def getCallTimes(configfile):
+    return int(readEngine("calltimes",configfile,1))
 
 def htmlPageName(configfile):
     return readEngine("html",configfile,1)
