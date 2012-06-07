@@ -67,7 +67,7 @@ def ftpBrowse(ftpObject, path): #more easy way to browse in ftp
     for i in paths:
         ftpObject.cwd(i)
 
-def fillString(mystring,ip): 
+def fillString(mystring,ip): #Thanks for the tip, Osman Karagöz!
     # =ip= for getIP()
     # =cpunumber= for str(psutil.NUM_CPUS)
     # =cpupercent= for str(psutil.cpu_percent(interval=1))
@@ -80,17 +80,17 @@ def fillString(mystring,ip):
     # =date= for getDate()
     # =interval= for interval
     # =platform= for platform.platform()
-
-    mystring = mystring.replace("=ip=", ip)
-    mystring = mystring.replace("=cpunumber=",str(psutil.NUM_CPUS))
-    mystring = mystring.replace("=cpupercent=", str(psutil.cpu_percent(interval=1)))
-    mystring = mystring.replace("=memory=",  str(psutil.phymem_usage().percent))
-    mystring = mystring.replace("=diskusage=",  str(psutil.disk_usage('/').percent))
-    mystring = mystring.replace("=random=", str(random.randint(23,124124)))
-    mystring = mystring.replace("=version=", constants.VERSION)
-    mystring = mystring.replace("=date=",getDate())
-    mystring = mystring.replace("=platform=", platform.platform())
-
+    filldict = {"ip":ip,
+                "cpunumber":str(psutil.NUM_CPUS),
+                "cpupercent": str(psutil.cpu_percent(interval=1)),
+                "memory":str(psutil.phymem_usage().percent),
+                "diskusage": str(psutil.disk_usage('/').percent),
+                "random": str(random.randint(23,124124)),
+                "version":  constants.VERSION,
+                "date": getDate(),
+                "platform": platform.platform(),
+                }
+    mystring = mystring.format(**filldict)
     return mystring
 
 def authorizeTwitter(ckey,csecret,atkey,atsecret):

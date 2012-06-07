@@ -5,8 +5,8 @@
     <body>
     <div class="centered">
     <h1>TDG Home Server Gateway!</h2>
-    <p>TDG Home Server's IP is: <a href="http://=ip=/">=ip=</a></p>
-    <p>This page updated at: =date=</br>
+    <p>TDG Home Server's IP is: <a href="http://{ip}/">{ip}</a></p>
+    <p>This page updated at: {date}</br>
     All of the current game servers will be listed here.</br>
     <b>Tip: You can join VAC enabled games from me!</b> </p>
     <h2>Game Server List</h2>
@@ -16,57 +16,73 @@
       <th>IP+Port</th>
       <th>Port</th>
       <th>Password</th>
-         
+      <th>Cheat Protection</th>
       </tr>
     <tr>
       <td>Minecraft</td>
-      <td>=ip=</td>
+      <td>{ip}</td>
       <td>25565</td>
       <td>None</td>
+      <td>None</td>
+
     </tr>
     
     <tr>
      <td>Urban Terror</td>
-      <td>=ip=:27960</td>
+      <td>{ip}:27960</td>
       <td>27960</td>
+      <td>None</td>
       <td>None</td>
 
     </tr>
 
     <tr>
      <td>VPN Server</td>
-      <td>=ip=</td>
+      <td>{ip}</td>
       <td>None</td>
       <td>You should contact me first!</td>
+      <td>...</td>
 
 
     </tr> 
  
     <tr>
-     <td>Garry's Mod (VAC)</td>
-      <td>=ip=:27015</td>
+     <td>Garry's Mod </td>
+      <td>{ip}:27015</td>
       <td>27015</td>
       <td>tdgtdgtdg</td>
+      <td>VAC</td>
 
 
     </tr> 
   
     <tr>
      <td>Half Life 2: Deathmatch (VAC)</td>
-      <td>=ip=:27015</td>
+      <td>{ip}:27015</td>
       <td>27015</td>
       <td>tdgunes</td>
+      <td>VAC</td>
+
+
+    </tr> 
+  
+    <tr>
+     <td>Day of Defeat: Source (VAC)</td>
+      <td>{ip}:27015</td>
+      <td>27015</td>
+      <td>None</td>
+      <td>VAC</td>
 
 
     </tr> 
 
 
     </table>
-    <p><b>This page is not saying that these servers are running!
-    </br> I will tell you if they are online or not :)</b></p>
+    <p><b>This page is for those that ask me "What is your server's ip?"
+    </br> And this is my answer for them :)</b></p>
     </br>
     </div> 
-    <i>sync.py - =version=</i></br>
-    <i>=platform=</i></br>
+    <a href="https://github.com/tdgunes/tdgsync"><i>sync.py</a> - {version}</i></br>
+    <i>{platform}</i></br>
     <i>Taha Dogan Gunes - <a href="http://tdgunes.org">tdgunes.org</a></i>
     </body></html>

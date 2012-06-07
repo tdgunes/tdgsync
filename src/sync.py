@@ -162,13 +162,13 @@ class api:  #configfile path will be getted with argparse(not ready)
         myip = self.getIP()   
    
         if self.isFirstStart():#First start of the service checks whether there is a /var/log/tdgsync.log or not
-            self.printLog(functions.fillString(self.startmessage))
+            self.printLog(functions.fillString(self.startmessage,myip))
             self.printLog(self.aRandomMessage(myip))
             self.sendIPviaFTP(myip)
         else:
             if self.isIPChanged(myip):
                 self.sendIPviaFTP(myip)
-                self.printLog(functions.fillString(self.dynamicmessage))
+                self.printLog(functions.fillString(self.dynamicmessage,myip))
             else:
                 pass
 

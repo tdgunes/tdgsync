@@ -8,7 +8,7 @@
 
 
 NAME = "tdgsync"
-VERSION = "0.4-beta"
+VERSION = "0.5"
 URL = "https://github.com/tdgunes/tdgsync"
 CORE_DEVELOPER = u"Taha Dogan Gunes"
 CORE_EMAIL = "tdgunes [at] gmail.com"
