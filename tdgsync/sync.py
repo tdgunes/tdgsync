@@ -1,40 +1,48 @@
-#!usr/bin/env python
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
+#
+# Author: Taha Doğan Güneş
+# Licensed under the GNU General Public License, version 3.
+# See the file http://www.gnu.org/copyleft/gpl.txt
+#
+# For increasing or decreasing photos exif create date to given difference time.
+#
+# Dependencies:
+#     tweepy
+#     psutil
+#
+# Usage:
+#     python sync.py configfile
+#
+# Example:
+#     python sync.py /home/example/sync.config
+#
 
-# Taha Dogan Gunes
-# tdgunes@gmail.com	
-# My ultimate test server solution!
-# Requirements: python-twitter
-# tdgunes.org/sync
-# needs lm_sensors!
-
-#FIXME needs a object-oriented sync.py for reader api connection 
-# and for behaving as a library
-
+# Standart Library
+ 
 from ftplib import FTP
-import functions
-import os,time,getpass,random,traceback,sys,argparse
-import datetime,httplib2,platform,reader,cStringIO
+import os
+import random
+import traceback
+import sys
+import argparse
+import datetime
+import httplib2
+import platform
+import cStringIO
 
-#import constants
-try:
-    import tweepy
-except ImportError:
-    print """\nWarning - If you want to post your server status to Twitter,\n
-           please install "tweepy" package from your distro's package system!\n
-           or "easy_install tweepy" is possible too.\n
-           You may need to edit this script to add your twitter user name.\n
-           It is best to follow instructions from where you have downloaded it."""
-try:
-    import psutil
-except ImportError:
-    pass
-    #more detailed information here FIXME
+# Sync Library
+
+import functions
+import reader
+import constants
+
+# 3rd Party Library
 
 class api:  #configfile path will be getted with argparse(not ready)
     def __init__(self, configfile):
         """
-        readers configfile automaticly and defines the values
+        readers configfile automatically and defines the values
         
         Example:
         
@@ -44,33 +52,39 @@ class api:  #configfile path will be getted with argparse(not ready)
         it stores ip in /var/log/tdgsync.log
         
         """
-        self.configfile = configfile
-        self.hostname = reader.getHostName(configfile)
-        self.login = reader.getFTPLoginName(configfile)
-        self.password = reader.ftpPassword(configfile)
-        self.filepath = reader.ftpFilePath(configfile)
-        self.filename = reader.htmlPageName(configfile)
-        #twitter api keys
-        tckey = reader.twitterAppKeys(configfile)[0]
+        self.configfile = configfile #configuration file
+        self.hostname = reader.getHostName(configfile) #ftp hostname
+        self.login = reader.getFTPLoginName(configfile) #ftp login name
+        self.password = reader.ftpPassword(configfile) #ftp password
+        self.filepath = reader.ftpFilePath(configfile) #ftp upload path
+        self.filename = reader.htmlPageName(configfile) #ftp upload file
+        #twitter api keys for tdgserver
+        tckey = reader.twitterAppKeys(configfile)[0] 
         tcsecret = reader.twitterAppKeys(configfile)[1]
         #these are from user
         tatkey = reader.twitterUserKeys(configfile)[0]
         tatsecret = reader.twitterUserKeys(configfile)[1]
-        #boolean
-        self.tweet = reader.twitter(configfile)
-        #version
-        self.version = "0.4-beta"#constants.version
-        self.limitTime =  reader.getCallTimes(configfile) # how many times script called 
+        
+        self.tweet = reader.twitter(configfile) #comes boolean
+        
+        self.version = constants.VERSION
+
+        self.limitTime =  reader.getCallTimes(configfile) # how many run times left until utility message can be called 
   
+
+        self.dynamicmessage = reader.getDynamicMessage(configfile)
+        self.startmessage = reader.getStartMessage(configfile)
+
+
         if self.tweet: #If you don't want twitter support
             self.tweetApi = functions.authorizeTwitter(tckey,tcsecret,tatkey,tatsecret)
 
     def logIP(self, newip):
         #clean first
         runtime = 0
-        if os.path.exists("/var/log/tdgsync.log"):
-            runtime = int(reader.getCallTimes("/var/log/tdgsync.log"))
-            reader.deleteFile("/var/log/tdgsync.log")
+        if os.path.exists(constants.LOGFILE):
+            runtime = int(reader.getCallTimes(constants.LOGFILE))
+            reader.deleteFile(constants.LOGFILE)
         else:
             runtime = 0
 
@@ -78,7 +92,7 @@ class api:  #configfile path will be getted with argparse(not ready)
         draft += "currentip=" + str(newip) +"\n"
         draft += "calltimes=" + str(runtime+1) 
         
-        reader.writeEngine(draft, "/var/log/tdgsync.log")
+        reader.writeEngine(draft, constants.LOGFILE)
 
     def getIP(self):
         return functions.getIP() #functions getIP
@@ -99,10 +113,11 @@ class api:  #configfile path will be getted with argparse(not ready)
                 return False
             finally:
                 print log
-    def sendIPviaFTP(self):
+    def sendIPviaFTP(self, ip):
         
         #making output
-        output = cStringIO.StringIO(functions.fillAStringWithValues(reader.getHTMLString(self.configfile)))
+        htmldraft =reader.getHTMLString(self.configfile)
+        output = cStringIO.StringIO(functions.fillString(htmldraft,ip))
 
         try:
             ftp = FTP(self.hostname,self.login,self.password)
@@ -116,7 +131,7 @@ class api:  #configfile path will be getted with argparse(not ready)
 
 
     def isFirstStart(self):
-        if os.path.exists("/var/log/tdgsync.log"): 
+        if os.path.exists(constants.LOGFILE): 
             return False
         else:
             return True
@@ -124,15 +139,15 @@ class api:  #configfile path will be getted with argparse(not ready)
 
     def isIPChanged(self,newip):
        
-        logip = reader.readEngine("currentip","/var/log/tdgsync.log",1)
+        logip = reader.readEngine("currentip",constants.LOGFILE,1)
         if newip != logip:
             return True
         else:
             return False
             
-    def aRandomMessage(self):
+    def aRandomMessage(self,ip):
         randomsentence = random.choice(reader.getSentencesLines(self.configfile))
-        randomsentence = functions.fillAStringWithValues(randomsentence)
+        randomsentence = functions.fillString(randomsentence,ip)
         return randomsentence
 
     def startAll(self):
@@ -144,38 +159,28 @@ class api:  #configfile path will be getted with argparse(not ready)
             5. and stores new ip address to /var/log/tdgsync.log, waits for another cron call
            
 
-
+            This makes just a one http request to get ip address to minimize internet activity
         """
         myip = self.getIP()   
    
         if self.isFirstStart():#First start of the service checks whether there is a /var/log/tdgsync.log or not
-            self.printLog("TDG Server is Online! sync: %s ip: %s" % (self.version,self.currentip))
-            self.printLog(self.aRandomMessage())
-            self.sendIPviaFTP()
+            self.printLog(functions.fillString(self.startmessage))
+            self.printLog(self.aRandomMessage(myip))
+            self.sendIPviaFTP(myip)
         else:
             if self.isIPChanged(myip):
-                self.sendIPviaFTP()
-                self.printLog("I hate being dynamic! But it is my nature: %s " % myip)
+                self.sendIPviaFTP(myip)
+                self.printLog(functions.fillString(self.dynamicmessage))
             else:
                 pass
 
-            if reader.getCallTimes("/var/log/tdgsync.log")==self.limitTime: #this is for sending a random message 
-                self.printLog(self.aRandomMessage())
-                reader.replaceEngine("calltimes","0","/var/log/tdgsync.log")
+            if reader.getCallTimes(constants.LOGFILE)==self.limitTime: #this is for sending a random message 
+                self.printLog(self.aRandomMessage(myip))
+                reader.replaceEngine("calltimes","0",constants.LOGFILE)
 
 
         self.logIP(myip)
 
-
-# ========================================================================================
-# ========================================================================================
-
-
-
-
-# ==== Service Start ====
-
-# Service Start and Loop Process
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="tdgsync tracks your ip changes and informs you if anything changes")
@@ -183,9 +188,7 @@ if __name__ == "__main__":
     parser.add_argument("configfile", help="path of sync.config file",
                         type=str)
     args = parser.parse_args()
-
     mySync = api(args.configfile)
     mySync.startAll() #makes everything :)
 
 
-# ==== Service End ====

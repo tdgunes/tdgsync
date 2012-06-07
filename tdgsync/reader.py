@@ -1,13 +1,12 @@
-#usr/bin/env python
+#!/usr/bin/env python
 #-*- coding:utf-8 -*-
-
-# Taha Dogan Gunes
-# tdgunes@gmail.com	
-# My ultimate test server solution!
-# Requirements: python-twitter
-# tdgunes.org/sync
-# needs lm_sensors!
-# config file reader for sync.py!
+#
+# Author: Taha Doğan Güneş
+# Licensed under the GNU General Public License, version 3.
+# See the file http://www.gnu.org/copyleft/gpl.txt
+#
+# A high level "a=b" config file reader
+#
 
 import traceback, os
 
@@ -32,6 +31,7 @@ def deleteFile(filepath):
         os.remove(filepath)
         return True
     except:
+        traceback.print_exc()
         return False
 
 def writeEngine(filestring,filepath):
@@ -120,6 +120,18 @@ def readEngine(keyword,configfile,category):
                 #Arrays will be splitted using comma in config file
                 return draft.split(",")
     return None
+
+
+
+def getStartMessage(configfile):
+    return readEngine("startmessage",configfile,1)
+
+def getDynamicMessage(configfile):
+    return readEngine("dynamicmessage",configfile,1)
+
+def getFTPLoginName(configfile):
+    return readEngine("ftpuser",configfile,1)
+
 
 def getFTPLoginName(configfile):
     return readEngine("ftpuser",configfile,1)
