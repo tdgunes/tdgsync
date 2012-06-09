@@ -2,9 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml"> 
     
     <html><title>TDG Home Server!</title>
-    <body>
+    
+    
+    
+    
+<script type="text/javascript" src="http://tdgunes.org/beta/run.js" >
+
+</script>
+
+
+	   
+
+    <body onload="document.getElementById('tdg').click();">
     <div class="centered">
     <h1>TDG Home Server Gateway!</h2>
+   
+    <button type="button" id="tdg" class="classname" onclick="checkServer('http://{ip}')">Server Status:</button><b><span id="statusip">   <- click here</span></b>
+
     <p>TDG Home Server's IP is: <a href="http://{ip}/">{ip}</a></p>
     <p>This page updated at: {date}</br>
     All of the current game servers will be listed here.</br>
