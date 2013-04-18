@@ -94,7 +94,7 @@ crontab -e
 to enter a cronjob to the cron. Usually all of the Linux distros have examples of
 adding a cronjob. 
 
-Add
+Add it to the list of cronjobs. That's it. You will be able to simply get your ip from your designated ftp server and of course via twitter!
 
 
     
