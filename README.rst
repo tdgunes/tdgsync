@@ -14,7 +14,7 @@ a static ip address.
 
 
 ***********
-Depedencies
+Dependencies
 ***********
 
 * tweepy
